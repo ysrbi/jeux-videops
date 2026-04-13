@@ -1,4 +1,9 @@
 services:
+  launcher-ui:
+    build: ./launcher
+    ports:
+      - "3000:80"
+
   game-two-ships:
     build: .
     ports:
