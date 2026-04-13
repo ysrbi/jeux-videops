@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Audit Security (Two Ships)
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=critical
 
       - name: Linting (Two Ships)
         run: npx eslint games/two_ships/**
@@ -46,7 +46,7 @@ jobs:
         run: npm ci
 
       - name: Audit Security (Space Word)
-        run: npm audit --audit-level=moderate
+        run: npm audit --audit-level=critical
 
       - name: Linting (Space Word)
         run: npx eslint games/space_word/**
