@@ -26,7 +26,9 @@ jobs:
         run: npm audit --audit-level=critical
 
       - name: Linting (Two Ships)
-        run: npx eslint games/two_ships/**
+        env:
+          ESLINT_USE_FLAT_CONFIG: false
+        run: npx eslint games/two_ships/** -c games/two_ships/.eslintrc.js
 
       - name: Unit Tests (Two Ships)
         run: npm test tests/two-ships.test.mjs
@@ -49,7 +51,9 @@ jobs:
         run: npm audit --audit-level=critical
 
       - name: Linting (Space Word)
-        run: npx eslint games/space_word/**
+        env:
+          ESLINT_USE_FLAT_CONFIG: false
+        run: npx eslint games/space_word/** -c games/space_word/.eslintrc.js
 
       - name: Unit Tests (Space Word)
         run: npm test tests/space-word.test.js
