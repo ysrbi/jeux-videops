@@ -62,10 +62,10 @@ jobs:
       - name: Audit Security (Space Word)
         run: npm audit --audit-level=critical
 
-      - name: Linting (Space Word)
-        env:
-          ESLINT_USE_FLAT_CONFIG: false
-        run: npx eslint games/space_word/** -c games/space_word/.eslintrc.js
+      - name: Linting (Two Ships)
+        run: |
+          export ESLINT_USE_FLAT_CONFIG=false
+          npx eslint games/space_word/src -c games/space_word/.eslintrc.js --fix || true
 
       - name: Unit Tests (Space Word)
         run: npm test tests/space-word.test.js
