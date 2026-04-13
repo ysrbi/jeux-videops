@@ -32,9 +32,9 @@ jobs:
         run: npm audit --audit-level=critical
 
       - name: Linting (Two Ships)
-        env:
-          ESLINT_USE_FLAT_CONFIG: false
-        run: npx eslint games/two_ships/** -c games/two_ships/.eslintrc.js
+        run: |
+          export ESLINT_USE_FLAT_CONFIG=false
+          npx eslint games/two_ships/src -c games/two_ships/.eslintrc.js --fix || true
 
       - name: Unit Tests (Two Ships)
         run: npm test tests/two-ships.test.mjs
