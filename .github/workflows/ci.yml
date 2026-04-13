@@ -20,7 +20,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install && npm install eslint@8.57.0 --save-dev
 
       - name: Audit Security (Two Ships)
         run: npm audit --audit-level=critical
@@ -45,7 +45,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install && npm install eslint@8.57.0 --save-dev
 
       - name: Audit Security (Space Word)
         run: npm audit --audit-level=critical
