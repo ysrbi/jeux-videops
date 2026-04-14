@@ -1,4 +1,4 @@
-/* eslint-disable func-style, no-restricted-syntax */
+
 
 'use strict';
 
@@ -12,18 +12,18 @@ import replace from 'gulp-replace';
 import size from 'gulp-size';
 import terser from 'gulp-terser';
 import zip from 'gulp-zip';
-import { inlineSource } from 'inline-source';
-import { Packer } from 'roadroller';
-import { rollup } from 'rollup';
+import {inlineSource} from 'inline-source';
+import {Packer} from 'roadroller';
+import {rollup} from 'rollup';
 import through2 from 'through2';
 
 const SPACES_AROUND_OPERATORS_REGEX = new RegExp(
-  `\\s*(${operators.map(escapeStringRegexp).join('|')})\\s*`,
-  'g',
+    `\\s*(${operators.map(escapeStringRegexp).join('|')})\\s*`,
+    'g',
 );
 
 const clean = () => del(['build', 'dist']);
-export { clean };
+export {clean};
 
 // https://github.com/mrdoob/three.js/blob/dev/utils/build/rollup.config.js
 function glConstants() {
@@ -75,36 +75,36 @@ function glsl() {
   function minify(code) {
     return (
       code
-        // Remove //
-        .replace(/\s*\/\/.*\n/g, '')
-        // Remove /* */
-        .replace(/\s*\/\*[\s\S]*?\*\//g, '')
-        // # \n+ to \n
-        .replace(/\n{2,}/g, '\n')
-        // Remove tabs and consecutive spaces with a single space
-        .replace(/\s{2,}|\t/g, ' ')
-        .split('\n')
-        .map((line, index, array) => {
-          line = line
-            .trim()
+      // Remove //
+          .replace(/\s*\/\/.*\n/g, '')
+      // Remove /* */
+          .replace(/\s*\/\*[\s\S]*?\*\//g, '')
+      // # \n+ to \n
+          .replace(/\n{2,}/g, '\n')
+      // Remove tabs and consecutive spaces with a single space
+          .replace(/\s{2,}|\t/g, ' ')
+          .split('\n')
+          .map((line, index, array) => {
+            line = line
+                .trim()
             // Remove spaces around operators.
-            .replace(SPACES_AROUND_OPERATORS_REGEX, '$1');
+                .replace(SPACES_AROUND_OPERATORS_REGEX, '$1');
 
-          // Append newlines after preprocessor directives.
-          if (line[0] === '#') {
-            line += '\n';
+            // Append newlines after preprocessor directives.
+            if (line[0] === '#') {
+              line += '\n';
 
-            // Append newlines before the start of preprocessor directive blocks.
-            if (index > 0) {
-              if (array[index - 1][0] !== '#') {
-                line = '\n' + line;
+              // Append newlines before the start of preprocessor directive blocks.
+              if (index > 0) {
+                if (array[index - 1][0] !== '#') {
+                  line = '\n' + line;
+                }
               }
             }
-          }
 
-          return line;
-        })
-        .join('')
+            return line;
+          })
+          .join('')
     );
   }
 
@@ -160,11 +160,11 @@ function glslMangle() {
       })();
 
       mangleableTokens.map(
-        (token, index) =>
-          (code = code.replace(
-            new RegExp(`\\b${token}\\b`, 'g'),
-            chars[index],
-          )),
+          (token, index) =>
+            (code = code.replace(
+                new RegExp(`\\b${token}\\b`, 'g'),
+                chars[index],
+            )),
       );
 
       return code;
@@ -182,112 +182,112 @@ export function bundle() {
       {
         transform(code) {
           [].map(
-            ([a, b]) => (code = code.replace(new RegExp(`\\b${a}\\b`, 'g'), b)),
+              ([a, b]) => (code = code.replace(new RegExp(`\\b${a}\\b`, 'g'), b)),
           );
           return code;
         },
       },
     ],
   })
-    .then(bundle =>
-      bundle.write({
-        file: 'dist/src/bundle.js',
-        format: 'es',
-      }),
-    )
-    .catch(error => console.error(error));
+      .then((bundle) =>
+        bundle.write({
+          file: 'dist/src/bundle.js',
+          format: 'es',
+        }),
+      )
+      .catch((error) => console.error(error));
 }
 
 export function minify() {
   return gulp
-    .src('dist/src/bundle.js')
-    .pipe(
-      terser({
-        compress: {
-          drop_console: true,
-          ecma: 2020,
-          module: true,
-          passes: 2,
-          unsafe_arrows: true,
-        },
-        mangle: {
-          module: true,
-        },
-      }),
-    )
-    .pipe(gulp.dest('dist/min'));
+      .src('dist/src/bundle.js')
+      .pipe(
+          terser({
+            compress: {
+              drop_console: true,
+              ecma: 2020,
+              module: true,
+              passes: 2,
+              unsafe_arrows: true,
+            },
+            mangle: {
+              module: true,
+            },
+          }),
+      )
+      .pipe(gulp.dest('dist/min'));
 }
 
 export function roadroller() {
   return gulp
-    .src('dist/min/bundle.js')
-    .pipe(
-      through2.obj(async (file, encoding, callback) => {
-        const packer = new Packer(
-          [
-            {
-              data: file.contents.toString(),
-              type: 'js',
-              action: 'eval',
-            },
-          ],
-          { optimize: 2 },
-        );
-        await packer.optimize();
-        const { firstLine, secondLine } = packer.makeDecoder();
-        file.contents = Buffer.from(firstLine + '\n' + secondLine);
-        callback(null, file);
-      }),
-    )
-    .pipe(gulp.dest('dist/min'));
+      .src('dist/min/bundle.js')
+      .pipe(
+          through2.obj(async (file, encoding, callback) => {
+            const packer = new Packer(
+                [
+                  {
+                    data: file.contents.toString(),
+                    type: 'js',
+                    action: 'eval',
+                  },
+                ],
+                {optimize: 2},
+            );
+            await packer.optimize();
+            const {firstLine, secondLine} = packer.makeDecoder();
+            file.contents = Buffer.from(firstLine + '\n' + secondLine);
+            callback(null, file);
+          }),
+      )
+      .pipe(gulp.dest('dist/min'));
 }
 
 export function html() {
   return gulp
-    .src('index.html')
-    .pipe(
-      htmlmin({
-        collapseWhitespace: true,
-        minifyCSS: true,
-        removeAttributeQuotes: true,
-        removeComments: true,
-        removeOptionalTags: true,
-      }),
-    )
-    .pipe(replace('./src/index.js', './bundle.js'))
-    .pipe(
-      through2.obj(async (file, encoding, callback) => {
-        const html = await inlineSource(file.contents.toString(), {
-          attribute: false,
-          compress: false,
-          rootpath: 'dist/min',
-        });
-        file.contents = Buffer.from(html);
-        callback(null, file);
-      }),
-    )
-    .pipe(gulp.dest('dist/min'));
+      .src('index.html')
+      .pipe(
+          htmlmin({
+            collapseWhitespace: true,
+            minifyCSS: true,
+            removeAttributeQuotes: true,
+            removeComments: true,
+            removeOptionalTags: true,
+          }),
+      )
+      .pipe(replace('./src/index.js', './bundle.js'))
+      .pipe(
+          through2.obj(async (file, encoding, callback) => {
+            const html = await inlineSource(file.contents.toString(), {
+              attribute: false,
+              compress: false,
+              rootpath: 'dist/min',
+            });
+            file.contents = Buffer.from(html);
+            callback(null, file);
+          }),
+      )
+      .pipe(gulp.dest('dist/min'));
 }
 
 export function compress() {
   return gulp
-    .src('dist/min/index.html')
-    .pipe(zip('build.zip'))
-    .pipe(size())
-    .pipe(size({ pretty: false }))
-    .pipe(gulp.dest('dist'));
+      .src('dist/min/index.html')
+      .pipe(zip('build.zip'))
+      .pipe(size())
+      .pipe(size({pretty: false}))
+      .pipe(gulp.dest('dist'));
 }
 
 export function compressAdvzip() {
   return gulp
-    .src('dist/build.zip')
-    .pipe(
-      advzip({
-        optimizationLevel: 4,
-        iterations: 100,
-      }),
-    )
-    .pipe(gulp.dest('dist'));
+      .src('dist/build.zip')
+      .pipe(
+          advzip({
+            optimizationLevel: 4,
+            iterations: 100,
+          }),
+      )
+      .pipe(gulp.dest('dist'));
 }
 
 const js = gulp.series(bundle, minify);
@@ -295,12 +295,12 @@ const build = gulp.series(clean, js, html);
 const dist = gulp.series(build, compress);
 const distAdvzip = gulp.series(dist, compressAdvzip);
 const distRoadrollerAdvzip = gulp.series(
-  clean,
-  js,
-  roadroller,
-  html,
-  compress,
-  compressAdvzip,
+    clean,
+    js,
+    roadroller,
+    html,
+    compress,
+    compressAdvzip,
 );
 
-export { js, build, dist, distAdvzip, distRoadrollerAdvzip };
+export {js, build, dist, distAdvzip, distRoadrollerAdvzip};

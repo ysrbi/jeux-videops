@@ -1,0 +1,68 @@
+name: Frontend Launcher Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "dev", "main" ]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: './frontend/package-lock.json'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Security Audit
+        # Si l'audit trouve des pb "high", le job s'arrête la 
+        run: npm audit --audit-level=high
+
+      - name: Lint Code (Syntax Check)
+        # On utilise le format github pour avoir les annotations sur ton commit
+        run: npx eslint . --format github 
+
+      - name: Build Test (Verification)
+        # On vérifie que le build React passe sans erreur
+        run: npm run build
+
+      # ARTIFACTS : save du dossier dist
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: launcher-dist
+          path: launcher/dist/
+
+  deployment:
+    needs: integration # déploie pas si l'audit ou le build est ko
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./launcher
+          push: true
+          tags: |
+            ghcr.io/${{ github.actor }}/launcher-ui:latest
