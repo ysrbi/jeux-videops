@@ -1,6 +1,6 @@
 services:
-  launcher-ui:
-    build: ./launcher
+  frontend-ui:
+    build: ./frontend
     ports:
       - "3000:80"
 
