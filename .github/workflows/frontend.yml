@@ -44,6 +44,7 @@ jobs:
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
+      contents: read
       packages: write
       pages: write
       id-token: write
@@ -51,6 +52,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: launcher-dist
+          path: ./frontend/dist
 
       - name: Log in to GHCR
         uses: docker/login-action@v3
@@ -70,10 +77,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
-      - name: Upload artifact
+      - name: Upload artifact for Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './frontend/build'
+          path: './frontend/dist'
 
       - name: Deploy to GitHub Pages
         id: deployment
