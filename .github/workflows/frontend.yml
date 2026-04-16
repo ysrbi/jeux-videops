@@ -30,7 +30,7 @@ jobs:
 
       - name: Lint Code (Syntax Check)
         # On utilise le format github pour avoir les annotations sur ton commit
-        run: npx eslint . --format github 
+        run: npx eslint . --format github
 
       - name: Build Test (Verification)
         # On vérifie que le build React passe sans erreur

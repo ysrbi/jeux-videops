@@ -13,13 +13,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
       
       - name: Audit Dependencies
         run: npm audit --audit-level=high
       
-      - name: Linter (Google Style)
+      - name: Linter (Google Style)        
         run: npx eslint "games/two_ships/**"
       
       - name: Run Unit Tests
@@ -33,12 +39,11 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-results-two-ships
-          path: |
-            tests/two_ships_tests/unitaires/
-            tests/two_ships_tests/fonctionnels/
+          path: tests/two_ships_tests/
 
   deployment:
     needs: integration
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       packages: write
