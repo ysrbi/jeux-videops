@@ -60,9 +60,7 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./Dockerfile
+          context: ./games/two_ships
+          file: ./games/two_ships/Dockerfile
           push: true
-          tags: |
-            ghcr.io/${{ github.actor }}/two-ships:latest
-            ghcr.io/${{ github.actor }}/two-ships:${{ github.sha }}
+          tags: ghcr.io/${{ github.actor }}/two-ships:latest

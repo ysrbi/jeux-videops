@@ -1,12 +1,18 @@
 services:
-  frontend-ui:
-    build: ./frontend
+  launcher-ui:
+    build:
+      context: ./frontend
     ports:
       - "3000:80"
 
   game-two-ships:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ./games/two_ships
     ports:
       - "9090:80"
+
+  game-space-word:
+    build:
+      context: ./games/space_word
+    ports:
+      - "8080:80"
