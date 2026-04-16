@@ -53,20 +53,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create staging directory
-        run: mkdir -p ./final_site
-
-      - name: Download React Build
-        uses: actions/download-artifact@v4
-        with:
-          name: launcher-dist
-          path: ./final_site
-
-      - name: Copy Games to Site
+      - name: Build Frontend
         run: |
-          mkdir -p ./final_site/games
-          cp -r games/space_word ./final_site/games/
-          cp -r games/two_ships ./final_site/games/
+          cd frontend
+          npm install
+          npm run build
+
+      - name: Prepare Final Directory
+        run: |
+          mkdir -p public_deploy
+          cp -r frontend/dist/* public_deploy/
+          mkdir -p public_deploy/games
+          cp -r games/* public_deploy/games/
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -74,7 +72,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './final_site'
+          path: './public_deploy'
 
       - name: Deploy to GitHub Pages
         uses: actions/deploy-pages@v4
