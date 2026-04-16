@@ -29,11 +29,11 @@ jobs:
         run: npx eslint "games/two_ships/**"
       
       - name: Run Unit Tests
-        run: npx mocha tests/two_ships_tests/unitaires/*.mjs
-        
+        run: npx mocha tests/two_ships_tests/unitaires/*.test.mjs
+
       - name: Run Functional Tests
-        run: npx mocha tests/two_ships_tests/fonctionnels/*.mjs
-        
+        run: npx mocha tests/two_ships_tests/fonctionnels/*.test.mjs
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4

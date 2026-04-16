@@ -61,4 +61,4 @@ jobs:
           file: ./frontend/Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.actor }}/launcher-ui:latest
+            ghcr.io/${{ github.actor }}/frontend:latest

@@ -1,5 +1,5 @@
 services:
-  launcher-ui:
+  frontend:
     build:
       context: ./frontend
     ports:
@@ -15,4 +15,4 @@ services:
     build:
       context: ./games/space_word
     ports:
-      - "8080:80"
+      - "8081:80"

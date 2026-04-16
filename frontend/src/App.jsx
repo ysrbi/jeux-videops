@@ -26,7 +26,7 @@ function App() {
         />
         <GameCard 
           title="Space Word" 
-          url="http://localhost:9091" 
+          url="http://localhost:8081" 
         />
       </main>
     </div>
