@@ -45,8 +45,13 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
+      pages: write
+      id-token: write
+    
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -57,8 +62,19 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
+          context: .
           file: ./frontend/Dockerfile
           push: true
-          tags: |
-            ghcr.io/${{ github.actor }}/frontend:latest
+          tags: ghcr.io/${{ github.actor }}/frontend:latest
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
