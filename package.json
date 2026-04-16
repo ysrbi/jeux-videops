@@ -28,11 +28,11 @@
     "nyc": "^18.0.0"
   },
   "overrides": {
-    "serialize-javascript": "6.0.2",
-    "diff": "5.2.0"
+    "serialize-javascript": "7.0.5",
+    "diff": "5.2.1"
   },
   "resolutions": {
-    "serialize-javascript": "6.0.2",
-    "diff": "5.2.0"
+    "serialize-javascript": "7.0.5",
+    "diff": "5.2.1"
   }
 }
