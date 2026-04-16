@@ -20,7 +20,7 @@ jobs:
         run: npm audit --audit-level=high
       
       - name: Linter (Google Style)
-        run: npx eslint "games/two_ships/**" --format github
+        run: npx eslint "games/two_ships/**"
       
       - name: Run Unit Tests
         run: npx mocha tests/two_ships_tests/unitaires/*.mjs
