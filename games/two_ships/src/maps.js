@@ -341,7 +341,7 @@ export var map0 = (gl, scene, camera) => {
       return target;
     });
 
-  const fireShipBullet = () => {
+  const _fireShipBullet = () => {
     const bulletGeometry = boxGeom_create(16, 16, 48);
     const bulletMaterial = material_create();
     vec3_set(bulletMaterial.emissive, 2, 0.5, 0.5);
@@ -703,7 +703,7 @@ export var map0 = (gl, scene, camera) => {
   };
 
   const bulletInterval = interval_create(0.1);
-  const shipBulletInterval = interval_create(5);
+  const _shipBulletInterval = interval_create(5);
 
   let bodies;
   var staticBodies;

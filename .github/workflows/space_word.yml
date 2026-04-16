@@ -23,8 +23,7 @@ jobs:
         run: npm audit --audit-level=high
 
       - name: Lint
-        run: npx eslint "frontend/public/games/space_word/**"
-
+        run: npx eslint "games/space_word/**"
         
       - name: Run Unit Tests
         run: npx mocha tests/space_word_tests/**/*.test.mjs
