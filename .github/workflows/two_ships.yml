@@ -47,6 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       packages: write
+      pages: write
+      id-token: write
     steps:
       - uses: actions/checkout@v4
 
@@ -64,3 +66,15 @@ jobs:
           file: ./games/two_ships/Dockerfile
           push: true
           tags: ghcr.io/${{ github.actor }}/two-ships:latest
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
