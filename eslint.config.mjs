@@ -9,6 +9,15 @@ delete googleRules['require-jsdoc'];
 export default [
   js.configs.recommended,
   {
+    files: ['**/games/**/.eslintrc.js'],
+    languageOptions: {
+      sourceType: 'commonjs',
+      globals: {
+        ...globals.node,
+      },
+    },
+  },
+  {
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -21,13 +30,19 @@ export default [
       ...googleRules,
       'no-var': 'off',
       'camelcase': 'off',
-      'max-len': ['warn', { 'code': 200 }], 
-      'no-unused-vars': 'warn',
+      'max-len': ['warn', { 'code': 200 }],
+      'no-unused-vars': ['warn', { 'varsIgnorePattern': '^[A-Z_]', 'args': 'none' }],
       'no-useless-assignment': 'warn',
       'semi': ['error', 'always'],
     },
   },
   {
-    ignores: ['node_modules/**', 'dist/**', 'tests/**'],
+    ignores: [
+    'node_modules/**',
+    'dist/**',
+    'tests/**',
+    'games/two_ships/.eslintrc.js',
+    'games/two_ships/src/maps.js',
+    ],
   },
 ];
