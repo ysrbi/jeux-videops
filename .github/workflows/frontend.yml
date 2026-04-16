@@ -53,6 +53,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Create staging directory
+        run: mkdir -p ./final_site
+
       - name: Download React Build
         uses: actions/download-artifact@v4
         with:

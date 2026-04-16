@@ -22,11 +22,11 @@ function App() {
 
         <GameCard 
           title="Two Ships" 
-          url="/jeux-videops/games/two_ships/index.html" 
+          url="games/two_ships/index.html" 
         />
         <GameCard 
           title="Space Word" 
-          url="/jeux-videops/games/space_word/index.html"
+          url="games/space_word/index.html"
         />
       </main>
     </div>
