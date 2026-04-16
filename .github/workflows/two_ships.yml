@@ -1,0 +1,66 @@
+name: Two Ships Pipeline
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "dev", "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm ci
+      
+      - name: Audit Dependencies
+        run: npm audit --audit-level=high
+      
+      - name: Linter (Google Style)        
+        run: npx eslint "games/two_ships/**"
+      
+      - name: Run Unit Tests
+        run: npx mocha tests/two_ships_tests/unitaires/*.test.mjs
+
+      - name: Run Functional Tests
+        run: npx mocha tests/two_ships_tests/fonctionnels/*.test.mjs
+
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-two-ships
+          path: tests/two_ships_tests/
+
+  deployment:
+    needs: integration
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./games/two_ships
+          file: ./games/two_ships/Dockerfile
+          push: true
+          tags: ghcr.io/${{ github.actor }}/two-ships:latest
