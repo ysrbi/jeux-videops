@@ -3,7 +3,7 @@ name: Two Ships Pipeline
 on:
   workflow_dispatch:
   push:
-    branches: [ "dev", "main" ]
+    branches: ['**']
   pull_request:
     branches: [ "main" ]
 
@@ -21,18 +21,73 @@ jobs:
 
       - name: Install Dependencies
         run: npm ci
-      
+
       - name: Audit Dependencies
-        run: npm audit --audit-level=high
-      
-      - name: Linter (Google Style)        
-        run: npx eslint "games/two_ships/**"
-      
+        id: audit
+        run: |
+          if npm audit --audit-level=high; then
+            echo "::notice title=Audit::✅ Aucune vulnérabilité critique détectée"
+            echo "### ✅ Audit des dépendances" >> $GITHUB_STEP_SUMMARY
+            echo "Aucune vulnérabilité de niveau high ou critical détectée." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=Audit::❌ Vulnérabilités critiques détectées dans les dépendances"
+            echo "### ❌ Audit des dépendances" >> $GITHUB_STEP_SUMMARY
+            echo "Des vulnérabilités critiques ont été détectées. Consultez les détails ci-dessus." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Linter (Google Style)
+        id: lint
+        run: |
+          if npx eslint "games/two_ships/**"; then
+            echo "::notice title=Lint::✅ Le code respecte le Google JavaScript Style Guide"
+            echo "### ✅ Lint (Google Style)" >> $GITHUB_STEP_SUMMARY
+            echo "Le code respecte le Google JavaScript Style Guide." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=Lint::❌ Des erreurs de style ont été détectées"
+            echo "### ❌ Lint (Google Style)" >> $GITHUB_STEP_SUMMARY
+            echo "Le code ne respecte pas le Google JavaScript Style Guide." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
       - name: Run Unit Tests
-        run: npx mocha tests/two_ships_tests/unitaires/*.test.mjs
+        id: unit_tests
+        run: |
+          if npx mocha tests/two_ships_tests/unitaires/*.test.mjs; then
+            echo "::notice title=Tests Unitaires::✅ Tous les tests unitaires sont passés"
+            echo "### ✅ Tests Unitaires" >> $GITHUB_STEP_SUMMARY
+            echo "Tous les tests unitaires ont été exécutés avec succès." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=Tests Unitaires::❌ Des tests unitaires ont échoué"
+            echo "### ❌ Tests Unitaires" >> $GITHUB_STEP_SUMMARY
+            echo "Certains tests unitaires ont échoué. Consultez les logs pour plus de détails." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
 
       - name: Run Functional Tests
-        run: npx mocha tests/two_ships_tests/fonctionnels/*.test.mjs
+        id: functional_tests
+        run: |
+          if npx mocha tests/two_ships_tests/fonctionnels/*.test.mjs; then
+            echo "::notice title=Tests Fonctionnels::✅ Tous les tests fonctionnels sont passés"
+            echo "### ✅ Tests Fonctionnels" >> $GITHUB_STEP_SUMMARY
+            echo "Tous les tests fonctionnels ont été exécutés avec succès." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=Tests Fonctionnels::❌ Des tests fonctionnels ont échoué"
+            echo "### ❌ Tests Fonctionnels" >> $GITHUB_STEP_SUMMARY
+            echo "Certains tests fonctionnels ont échoué. Consultez les logs pour plus de détails." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Pipeline Summary
+        if: always()
+        run: |
+          echo "## 🎮 Two Ships Pipeline — Résumé" >> $GITHUB_STEP_SUMMARY
+          echo "| Étape | Statut |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Audit Dépendances | ${{ steps.audit.outcome == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Lint Google Style | ${{ steps.lint.outcome == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests Unitaires   | ${{ steps.unit_tests.outcome == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests Fonctionnels| ${{ steps.functional_tests.outcome == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Test Results
         if: always()
