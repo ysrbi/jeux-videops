@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     branches: ['**']
-  pull_request: 
+  pull_request:
     branches: ["main"]
 
 jobs:
@@ -27,15 +27,60 @@ jobs:
         run: npm install
 
       - name: Security Audit
-        run: npm audit --audit-level=high
+        id: audit
+        run: |
+          if npm audit --audit-level=high; then
+            echo "::notice title=Audit de sécurité::Aucune vulnérabilité critique identifiée dans les dépendances."
+            echo "### Audit de sécurité" >> $GITHUB_STEP_SUMMARY
+            echo "Les dépendances ont été vérifiées. Aucune vulnérabilité de niveau élevé ou critique n'a été détectée." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=Audit de sécurité::Des vulnérabilités critiques ont été identifiées. Le pipeline est interrompu."
+            echo "### Audit de sécurité" >> $GITHUB_STEP_SUMMARY
+            echo "Des vulnérabilités critiques ont été détectées dans les dépendances. Veuillez consulter les détails dans les logs." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
 
       - name: Lint Code (Syntax Check)
-        run: npx eslint .
+        id: lint
+        run: |
+          if npx eslint .; then
+            echo "::notice title=Analyse du code::Le code du launcher respecte les règles de style définies."
+            echo "### Analyse du code (Lint)" >> $GITHUB_STEP_SUMMARY
+            echo "Le code source a été analysé et respecte les règles de style configurées." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=Analyse du code::Des violations de style ont été détectées dans le code du launcher."
+            echo "### Analyse du code (Lint)" >> $GITHUB_STEP_SUMMARY
+            echo "L'analyse a révélé des violations de style. Veuillez corriger les erreurs signalées avant de continuer." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
 
       - name: Build Launcher
-        run: npm run build
+        id: build
+        run: |
+          if npm run build; then
+            echo "::notice title=Build::Le launcher a été compilé avec succès."
+            echo "### Build du launcher" >> $GITHUB_STEP_SUMMARY
+            echo "La compilation s'est terminée sans erreur. Les fichiers de production sont prêts." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "::error title=Build::La compilation du launcher a échoué."
+            echo "### Build du launcher" >> $GITHUB_STEP_SUMMARY
+            echo "La compilation a échoué. Veuillez consulter les logs pour identifier la cause de l'erreur." >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Pipeline Summary
+        if: always()
+        run: |
+          echo "## Frontend Pipeline — Résumé de l'intégration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Etape | Résultat |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Audit de sécurité | ${{ steps.audit.outcome == 'success' && 'Réussi' || 'Echoué' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Analyse du code   | ${{ steps.lint.outcome == 'success' && 'Réussi' || 'Echoué' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Build             | ${{ steps.build.outcome == 'success' && 'Réussi' || 'Echoué' }} |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload Build Artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: launcher-dist
@@ -49,7 +94,7 @@ jobs:
       contents: read
       pages: write
       id-token: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -59,7 +104,7 @@ jobs:
           cd frontend
           npm install
           npm run build
-        
+
       - name: Create Production Bundle
         run: |
           mkdir -p deploy_root

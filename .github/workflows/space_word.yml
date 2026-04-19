@@ -1,100 +1,101 @@
 name: Space Word Pipeline
- 
+
 on:
   workflow_dispatch:
   push:
     branches: ['**']
   pull_request:
     branches: ["main"]
- 
+
 jobs:
   integration:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
- 
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
- 
+
       - name: Install
         run: npm install
- 
+
       - name: Audit
         id: audit
         run: |
           if npm audit --audit-level=high; then
-            echo "::notice title=Audit::✅ Aucune vulnérabilité critique détectée"
-            echo "### ✅ Audit des dépendances" >> $GITHUB_STEP_SUMMARY
-            echo "Aucune vulnérabilité de niveau high ou critical détectée." >> $GITHUB_STEP_SUMMARY
+            echo "::notice title=Audit de sécurité::Aucune vulnérabilité critique identifiée dans les dépendances."
+            echo "### Audit de sécurité" >> $GITHUB_STEP_SUMMARY
+            echo "Les dépendances ont été vérifiées. Aucune vulnérabilité de niveau élevé ou critique n'a été détectée." >> $GITHUB_STEP_SUMMARY
           else
-            echo "::error title=Audit::❌ Vulnérabilités critiques détectées dans les dépendances"
-            echo "### ❌ Audit des dépendances" >> $GITHUB_STEP_SUMMARY
-            echo "Des vulnérabilités critiques ont été détectées. Consultez les détails ci-dessus." >> $GITHUB_STEP_SUMMARY
+            echo "::error title=Audit de sécurité::Des vulnérabilités critiques ont été identifiées. Le pipeline est interrompu."
+            echo "### Audit de sécurité" >> $GITHUB_STEP_SUMMARY
+            echo "Des vulnérabilités critiques ont été détectées dans les dépendances. Veuillez consulter les détails dans les logs." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
- 
+
       - name: Lint
         id: lint
         run: |
           if npx eslint "games/space_word/**"; then
-            echo "::notice title=Lint::✅ Le code respecte le Google JavaScript Style Guide"
-            echo "### ✅ Lint (Google Style)" >> $GITHUB_STEP_SUMMARY
-            echo "Le code respecte le Google JavaScript Style Guide." >> $GITHUB_STEP_SUMMARY
+            echo "::notice title=Analyse du code::Le code de Space Word respecte les règles de style définies."
+            echo "### Analyse du code (Lint)" >> $GITHUB_STEP_SUMMARY
+            echo "Le code source a été analysé et respecte le Google JavaScript Style Guide." >> $GITHUB_STEP_SUMMARY
           else
-            echo "::error title=Lint::❌ Des erreurs de style ont été détectées"
-            echo "### ❌ Lint (Google Style)" >> $GITHUB_STEP_SUMMARY
-            echo "Le code ne respecte pas le Google JavaScript Style Guide." >> $GITHUB_STEP_SUMMARY
+            echo "::error title=Analyse du code::Des violations de style ont été détectées dans le code de Space Word."
+            echo "### Analyse du code (Lint)" >> $GITHUB_STEP_SUMMARY
+            echo "L'analyse a révélé des violations de style. Veuillez corriger les erreurs signalées avant de continuer." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
- 
+
       - name: Run Unit Tests
         id: unit_tests
         run: |
           if npx mocha tests/space_word_tests/unitaires/*.test.mjs; then
-            echo "::notice title=Tests Unitaires::✅ Tous les tests unitaires sont passés"
-            echo "### ✅ Tests Unitaires" >> $GITHUB_STEP_SUMMARY
-            echo "Tous les tests unitaires ont été exécutés avec succès." >> $GITHUB_STEP_SUMMARY
+            echo "::notice title=Tests unitaires::Tous les tests unitaires ont été exécutés avec succès."
+            echo "### Tests unitaires" >> $GITHUB_STEP_SUMMARY
+            echo "L'ensemble des tests unitaires s'est terminé sans échec." >> $GITHUB_STEP_SUMMARY
           else
-            echo "::error title=Tests Unitaires::❌ Des tests unitaires ont échoué"
-            echo "### ❌ Tests Unitaires" >> $GITHUB_STEP_SUMMARY
-            echo "Certains tests unitaires ont échoué. Consultez les logs pour plus de détails." >> $GITHUB_STEP_SUMMARY
+            echo "::error title=Tests unitaires::Un ou plusieurs tests unitaires ont échoué."
+            echo "### Tests unitaires" >> $GITHUB_STEP_SUMMARY
+            echo "Certains tests unitaires n'ont pas produit le résultat attendu. Veuillez consulter les logs pour identifier les cas en échec." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
- 
+
       - name: Run Functional Tests
         id: functional_tests
         run: |
           if npx mocha tests/space_word_tests/fonctionnels/*.test.mjs; then
-            echo "::notice title=Tests Fonctionnels::✅ Tous les tests fonctionnels sont passés"
-            echo "### ✅ Tests Fonctionnels" >> $GITHUB_STEP_SUMMARY
-            echo "Tous les tests fonctionnels ont été exécutés avec succès." >> $GITHUB_STEP_SUMMARY
+            echo "::notice title=Tests fonctionnels::Tous les tests fonctionnels ont été exécutés avec succès."
+            echo "### Tests fonctionnels" >> $GITHUB_STEP_SUMMARY
+            echo "L'ensemble des tests fonctionnels s'est terminé sans échec." >> $GITHUB_STEP_SUMMARY
           else
-            echo "::error title=Tests Fonctionnels::❌ Des tests fonctionnels ont échoué"
-            echo "### ❌ Tests Fonctionnels" >> $GITHUB_STEP_SUMMARY
-            echo "Certains tests fonctionnels ont échoué. Consultez les logs pour plus de détails." >> $GITHUB_STEP_SUMMARY
+            echo "::error title=Tests fonctionnels::Un ou plusieurs tests fonctionnels ont échoué."
+            echo "### Tests fonctionnels" >> $GITHUB_STEP_SUMMARY
+            echo "Certains tests fonctionnels n'ont pas produit le résultat attendu. Veuillez consulter les logs pour identifier les cas en échec." >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
- 
+
       - name: Pipeline Summary
         if: always()
         run: |
-          echo "## 🚀 Space Word Pipeline — Résumé" >> $GITHUB_STEP_SUMMARY
-          echo "| Étape | Statut |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Audit Dépendances | ${{ steps.audit.outcome == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Lint Google Style | ${{ steps.lint.outcome == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests Unitaires   | ${{ steps.unit_tests.outcome == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Tests Fonctionnels| ${{ steps.functional_tests.outcome == 'success' && '✅' || '❌' }} |" >> $GITHUB_STEP_SUMMARY
- 
+          echo "## Space Word Pipeline — Résumé de l'intégration" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Etape | Résultat |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|----------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Audit de sécurité | ${{ steps.audit.outcome == 'success' && 'Réussi' || 'Echoué' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Analyse du code   | ${{ steps.lint.outcome == 'success' && 'Réussi' || 'Echoué' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests unitaires   | ${{ steps.unit_tests.outcome == 'success' && 'Réussi' || 'Echoué' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests fonctionnels| ${{ steps.functional_tests.outcome == 'success' && 'Réussi' || 'Echoué' }} |" >> $GITHUB_STEP_SUMMARY
+
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-space-word
           path: tests/space_word_tests/
- 
+
   deployment:
     needs: integration
     if: github.ref == 'refs/heads/main'
@@ -105,14 +106,14 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
- 
+
       - name: Login to GHCR
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
- 
+
       - name: Build & Push
         uses: docker/build-push-action@v5
         with:
@@ -120,15 +121,15 @@ jobs:
           file: ./games/space_word/Dockerfile
           push: true
           tags: ghcr.io/${{ github.actor }}/space-word:latest
- 
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
- 
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
- 
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
