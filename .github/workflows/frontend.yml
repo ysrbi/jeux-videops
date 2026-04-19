@@ -6,6 +6,10 @@ on:
     branches: ['**']
   pull_request:
     branches: ["main"]
+  workflow_run:
+    workflows: ["Two Ships Pipeline", "Space Word Pipeline"]
+    types: [completed]
+    branches: [main]
 
 jobs:
   integration:
@@ -88,7 +92,9 @@ jobs:
 
   deployment:
     needs: integration
-    if: github.ref == 'refs/heads/main'
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion != 'cancelled')
     runs-on: ubuntu-latest
     permissions:
       contents: read
