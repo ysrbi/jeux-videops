@@ -1,0 +1,20 @@
+:root {
+  --neon-cyan: #00f3ff;
+  --neon-magenta: #ff00ff;
+  --space-black: #050508;
+  --glass-bg: rgba(15, 15, 25, 0.8);
+  --font-cyber: 'Orbitron', 'Segoe UI', sans-serif;
+}
+
+body {
+  margin: 0;
+  background-color: var(--space-black);
+  background-image: 
+    radial-gradient(1px 1px at 25% 15%, #fff, transparent),
+    radial-gradient(1px 1px at 75% 65%, #fff, transparent),
+    radial-gradient(1.5px 1.5px at 50% 50%, rgba(0, 243, 255, 0.2), transparent);
+  background-size: 250px 250px;
+  color: #e0e0e0;
+  font-family: var(--font-cyber);
+  overflow-x: hidden;
+}
